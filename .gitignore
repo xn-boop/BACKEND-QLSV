@@ -1,0 +1,20 @@
+# ── Compiled Binaries ─────────────────────────────────────
+*.exe
+*.o
+*.out
+sms
+
+# ── Auto-generated Reports ────────────────────────────────
+reports/*
+!reports/.gitkeep
+
+# ── VS Code personal settings ─────────────────────────────
+.vscode/
+
+# ── Build output folder ───────────────────────────────────
+build/
+
+# ── OS junk ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,5 @@
+101,Rishi Sharma,20,BCA Cyber Security,88.0
+102,Rahul Verma,19,BCA,75.5
+103,Ankit Patel,21,BSc IT,91.0
+104,Priya Singh,20,BCA Cyber Security,55.0
+105,Amit Kumar,22,MCA,82.5
