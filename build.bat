@@ -9,7 +9,7 @@ echo    Building with g++ (C++17)
 echo  ============================================
 echo.
 
-g++ src/main.cpp src/Student.cpp src/StudentManager.cpp -I include -std=c++17 -Wall -o sms.exe
+g++ src/main.cpp src/Student.cpp src/Course.cpp src/CourseOffering.cpp src/Enrollment.cpp src/User.cpp src/AuditLogger.cpp src/StudentManager.cpp -I include -std=c++17 -Wall -o sms.exe
 
 if %errorlevel%==0 (
     echo.

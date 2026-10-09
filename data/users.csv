@@ -1,0 +1,3 @@
+username,password,role,ref_id
+student101,student123,STUDENT,101
+admin,admin123,ADMIN,none

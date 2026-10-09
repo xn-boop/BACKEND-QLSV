@@ -7,7 +7,7 @@
 
 CXX      = g++
 CXXFLAGS = -std=c++17 -Wall -I include
-SRC      = src/main.cpp src/Student.cpp src/StudentManager.cpp
+SRC      = src/main.cpp src/Student.cpp src/Course.cpp src/CourseOffering.cpp src/Enrollment.cpp src/User.cpp src/AuditLogger.cpp src/StudentManager.cpp
 TARGET   = sms
 
 # Windows: add .exe extension
