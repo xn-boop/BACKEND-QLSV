@@ -1,91 +1,44 @@
-/*
- * ============================================================
- *  StudentManager.h
- *  Declares StudentManager — handles all CRUD, file I/O,
- *  sorting, analytics, admin authentication, and report export.
- *
- *  OOP Concepts: Abstraction (hides all business logic),
- *  Encapsulation (private helpers), Separation of Concerns
- * ============================================================
- */
+#ifndef STUDENT_MANAGER_H
+#define STUDENT_MANAGER_H
 
-#ifndef STUDENTMANAGER_H
-#define STUDENTMANAGER_H
-
+#include "Course.h"
+#include "CourseOffering.h"
+#include "Enrollment.h"
 #include "Student.h"
+#include "User.h"
 
-#include <vector>
 #include <string>
-using namespace std;
+#include <unordered_map>
 
-// ─────────────────────────────────────────────
-//  File path constants
-// ─────────────────────────────────────────────
-const string STUDENTS_FILE = "data/students.txt";
-const string ADMIN_FILE    = "data/admin.txt";
-const string REPORTS_DIR   = "reports";
-const int    MAX_ATTEMPTS  = 3;
-
-// ─────────────────────────────────────────────
-//  StudentManager class
-// ─────────────────────────────────────────────
-
-class StudentManager
-{
+class StudentManager {
 private:
-    vector<Student> students;   // in-memory store (STL vector)
-    bool dataModified;          // tracks unsaved changes
+    std::unordered_map<std::string, Student> students;
+    std::unordered_map<std::string, Course> courses;
+    std::unordered_map<std::string, CourseOffering> offerings;
+    std::unordered_map<std::string, Enrollment> enrollments;
+    std::unordered_map<std::string, User> users;
+    std::string currentUsername;
+    bool dataModified = false;
 
-    // ── Internal helpers ──────────────────────
-    bool   idExists(int id)                          const;
-    void   printTableHeader()                        const;
-    void   printTableFooter()                        const;
-    int    findIndexById(int id)                     const;
-
-    // ── Input helpers ─────────────────────────
-    int    readInt   (const string& prompt, int  lo, int  hi) const;
-    float  readFloat (const string& prompt, float lo, float hi) const;
-    string readString(const string& prompt)                    const;
-    bool   confirm   (const string& prompt)                    const;
-
-    // ── Admin helpers ─────────────────────────
-    void   createDefaultAdminFile()                  const;
+    bool loadStudents(); bool loadCourses(); bool loadOfferings(); bool loadEnrollments(); bool loadUsers();
+    bool saveStudents() const; bool saveCourses() const; bool saveOfferings() const; bool saveEnrollments() const; bool saveUsers() const;
+    static std::string trim(const std::string& value);
 
 public:
-    // ── Constructor ───────────────────────────
-    StudentManager();
-
-    // ── Authentication ────────────────────────
-    bool adminLogin();                      // returns true on success
-
-    // ── File I/O ──────────────────────────────
-    void loadFromFile();
-    void saveToFile()  const;
-
-    // ── CRUD ──────────────────────────────────
+    bool loginUser(User& authenticatedUser);
+    void loadAllData();
+    bool saveAllData();
     void addStudent();
-    void viewStudents()   const;
-    void searchStudent()  const;
-    void updateStudent();
     void deleteStudent();
-
-    // ── Sort ──────────────────────────────────
-    void sortMenu();
-    void sortById();
-    void sortByName();
-    void sortByMarks();
-
-    // ── Analytics (console) ───────────────────
-    void showAnalytics() const;
-
-    // ── Export Analytics Report (pure C++) ────
-    void exportReport() const;   // saves formatted .txt report to reports/
-
-    // ── Explicit save (menu option 8) ─────────
-    void saveData();
-
-    // ── Unsaved-changes flag ──────────────────
+    void viewStudents() const;
+    void searchStudent() const;
+    void showDataSummary() const;
+    void viewStudentProfile(const User& user) const;
+    void viewOpenOfferings() const;
+    void enrollInOffering(const User& user);
+    void viewMyEnrollments(const User& user) const;
+    void updateEnrollmentGrades();
     bool hasUnsavedChanges() const;
 };
 
-#endif // STUDENTMANAGER_H
+#endif
