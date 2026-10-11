@@ -19,9 +19,11 @@ private:
     std::unordered_map<std::string, User> users;
     std::string currentUsername;
     bool dataModified = false;
+    bool dataLoadComplete = true;
 
     bool loadStudents(); bool loadCourses(); bool loadOfferings(); bool loadEnrollments(); bool loadUsers();
     bool saveStudents() const; bool saveCourses() const; bool saveOfferings() const; bool saveEnrollments() const; bool saveUsers() const;
+    bool validateRelationships() const;
     static std::string trim(const std::string& value);
 
 public:

@@ -2,23 +2,32 @@
 
 #include <iostream>
 #include <limits>
+#include <optional>
 
 namespace {
-int readChoice() {
+std::optional<int> readChoice() {
     int choice = -1;
     std::cout << "Choice: ";
-    if (!(std::cin >> choice)) { std::cin.clear(); choice = -1; }
+    if (!(std::cin >> choice)) {
+        if (std::cin.eof()) return std::nullopt;
+        std::cin.clear();
+    }
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return choice;
 }
 
-void pause() { std::cout << "\nPress Enter to continue..."; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); }
+void pause() {
+    std::cout << "\nPress Enter to continue...";
+    if (!std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n') && std::cin.eof()) std::cout << '\n';
+}
 
 void runAdminMenu(StudentManager& manager) {
     while (true) {
         std::cout << "\n=== ADMIN MENU ===\n1. Add Student\n2. View Active Students\n3. Search Active Student\n"
                   << "4. Deactivate Student\n5. Save All CSV Data\n6. Show Data Summary\n7. Enter/Edit Enrollment Grades\n0. Logout\n";
-        switch (readChoice()) {
+        const auto choice = readChoice();
+        if (!choice) return;
+        switch (*choice) {
             case 1: manager.addStudent(); pause(); break;
             case 2: manager.viewStudents(); pause(); break;
             case 3: manager.searchStudent(); pause(); break;
@@ -36,7 +45,9 @@ void runStudentMenu(StudentManager& manager, const User& user) {
     while (true) {
         std::cout << "\n=== STUDENT MENU ===\n1. View My Profile\n2. View Course Offerings\n"
                   << "3. Enroll in Course Offering\n4. View My Enrollments\n0. Logout\n";
-        switch (readChoice()) {
+        const auto choice = readChoice();
+        if (!choice) return;
+        switch (*choice) {
             case 1: manager.viewStudentProfile(user); pause(); break;
             case 2: manager.viewOpenOfferings(); pause(); break;
             case 3: manager.enrollInOffering(user); pause(); break;
@@ -58,7 +69,14 @@ int main() {
         if (currentUser.role == "ADMIN") runAdminMenu(manager);
         else if (currentUser.role == "STUDENT") runStudentMenu(manager, currentUser);
         else std::cout << "  [!] Role " << currentUser.role << " has no menu in this phase.\n";
-        if (manager.hasUnsavedChanges()) manager.saveAllData();
+        while (manager.hasUnsavedChanges() && !manager.saveAllData()) {
+            std::cout << "Retry save before logout? (y/n): ";
+            std::string answer;
+            if (!std::getline(std::cin, answer) || answer != "y") {
+                std::cerr << "  [ERROR] Logout continues with unsaved in-memory changes.\n";
+                break;
+            }
+        }
         if (std::cin.eof()) break;
         std::cout << "\nLogged out.\n";
     }

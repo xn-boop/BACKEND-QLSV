@@ -1,14 +1,13 @@
 #include "../include/Course.h"
+#include "../include/CsvUtils.h"
 
-#include <sstream>
-#include <vector>
-
-std::string Course::toCsv() const { return id + "," + name + "," + std::to_string(credits); }
+std::string Course::toCsv() const { return CsvUtils::writeRow({id, name, std::to_string(credits)}); }
 
 bool Course::fromCsv(const std::string& line, Course& course) {
-    std::istringstream input(line); std::vector<std::string> fields; std::string field;
-    while (std::getline(input, field, ',')) fields.push_back(field);
-    if (fields.size() != 3 || fields[0].empty()) return false;
-    try { course.credits = std::stoi(fields[2]); } catch (...) { return false; }
-    course.id = fields[0]; course.name = fields[1]; return true;
+    std::vector<std::string> fields;
+    if (!CsvUtils::parseRow(line, fields) || fields.size() != 3 || fields[0].empty()) return false;
+    int credits = 0;
+    if (!CsvUtils::parseInt(fields[2], credits) || credits <= 0 || fields[1].empty()) return false;
+    course.id = fields[0]; course.name = fields[1]; course.credits = credits;
+    return true;
 }
