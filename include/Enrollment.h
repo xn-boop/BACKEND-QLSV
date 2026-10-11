@@ -2,6 +2,7 @@
 #define ENROLLMENT_H
 
 #include <string>
+#include <optional>
 #include <vector>
 
 struct Enrollment {
@@ -11,9 +12,9 @@ struct Enrollment {
     std::string status = "active";
     std::vector<std::pair<std::string, float>> grades;
 
-    float gradeFor(const std::string& component) const;
+    std::optional<float> gradeFor(const std::string& component) const;
     void setGrade(const std::string& component, float score);
-    float calculateFinalGrade() const;
+    std::optional<float> calculateFinalGrade() const;
     std::string toCsv() const;
     static bool fromCsv(const std::string& line, Enrollment& enrollment);
 };

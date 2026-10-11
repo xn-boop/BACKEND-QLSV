@@ -1,11 +1,11 @@
 #include "../include/Enrollment.h"
+#include "../include/CsvUtils.h"
 
 #include <iomanip>
 #include <sstream>
-#include <vector>
 
 namespace {
-std::vector<std::string> split(const std::string& value, char delimiter) {
+std::vector<std::string> splitGrades(const std::string& value, char delimiter) {
     std::vector<std::string> parts;
     std::istringstream input(value);
     std::string part;
@@ -23,9 +23,9 @@ std::string serializeGrades(const std::vector<std::pair<std::string, float>>& gr
 }
 }
 
-float Enrollment::gradeFor(const std::string& component) const {
+std::optional<float> Enrollment::gradeFor(const std::string& component) const {
     for (const auto& grade : grades) if (grade.first == component) return grade.second;
-    return 0.0F;
+    return std::nullopt;
 }
 
 void Enrollment::setGrade(const std::string& component, float score) {
@@ -35,26 +35,29 @@ void Enrollment::setGrade(const std::string& component, float score) {
     grades.emplace_back(component, score);
 }
 
-float Enrollment::calculateFinalGrade() const {
-    return gradeFor("Midterm") * 0.30F + gradeFor("Final") * 0.70F;
+std::optional<float> Enrollment::calculateFinalGrade() const {
+    const auto midterm = gradeFor("Midterm");
+    const auto finalExam = gradeFor("Final");
+    if (!midterm || !finalExam) return std::nullopt;
+    return *midterm * 0.30F + *finalExam * 0.70F;
 }
 
 std::string Enrollment::toCsv() const {
-    return id + "," + student_id + "," + offering_id + "," + status + "," + serializeGrades(grades);
+    return CsvUtils::writeRow({id, student_id, offering_id, status, serializeGrades(grades)});
 }
 
 bool Enrollment::fromCsv(const std::string& line, Enrollment& enrollment) {
-    const auto fields = split(line, ',');
-    if ((fields.size() != 4 && fields.size() != 5) || fields[0].empty()) return false;
+    std::vector<std::string> fields;
+    if (!CsvUtils::parseRow(line, fields) || (fields.size() != 4 && fields.size() != 5) || fields[0].empty()) return false;
     enrollment.id = fields[0]; enrollment.student_id = fields[1]; enrollment.offering_id = fields[2];
     enrollment.status = fields[3].empty() ? "active" : fields[3]; enrollment.grades.clear();
     if (fields.size() == 5 && !fields[4].empty()) {
-        for (const auto& item : split(fields[4], '|')) {
+        for (const auto& item : splitGrades(fields[4], '|')) {
             const auto separator = item.find(':');
-            if (separator == std::string::npos || separator == 0) return false;
-            try { enrollment.grades.emplace_back(item.substr(0, separator), std::stof(item.substr(separator + 1))); }
-            catch (...) { return false; }
+            float score = 0.0F;
+            if (separator == std::string::npos || separator == 0 || !CsvUtils::parseScore(item.substr(separator + 1), score)) return false;
+            enrollment.grades.emplace_back(item.substr(0, separator), score);
         }
     }
-    return true;
+    return !enrollment.student_id.empty() && !enrollment.offering_id.empty();
 }
